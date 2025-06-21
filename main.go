@@ -13,4 +13,5 @@ func main() {
 
 	// day 1
 	solutions2023.Day1()
+	solutions2023.Day2(false, false)
 }

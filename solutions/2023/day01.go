@@ -44,15 +44,11 @@ func Day1() {
 		p1Nums := extractNumberStrings(line)
 		if len(p1Nums) >= 1 {
 			part1 += convertNumberStringToNumber(p1Nums[0] + p1Nums[len(p1Nums)-1])
-		} else if len(p1Nums) == 1 {
-			part1 += convertNumberStringToNumber(p1Nums[0])
 		}
 
 		p2Nums := extractNumberStrings(transformedLine)
 		if len(p2Nums) >= 1 {
 			part2 += convertNumberStringToNumber(p2Nums[0] + p2Nums[len(p2Nums)-1])
-		} else if len(p2Nums) == 1 {
-			part2 += convertNumberStringToNumber(p2Nums[0])
 		}
 		// fmt.Println(part1, part2)
 	}
