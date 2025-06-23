@@ -51,10 +51,7 @@ func (c coordinate) isNumeric(grid [][]string) bool {
 func (c coordinate) isSymbol(grid [][]string) bool {
 	char := grid[c.y][c.x]
 	_, ok := nonSymbols[char]
-	if !ok {
-		return true
-	}
-	return false
+	return !ok
 }
 
 func (c coordinate) hasAdjacentSymbol(num string, grid [][]string) bool {
@@ -72,6 +69,45 @@ func (c coordinate) hasAdjacentSymbol(num string, grid [][]string) bool {
 	return false
 }
 
+type gear struct {
+	nums []int
+	coor coordinate
+	gearRatio int
+}
+
+func (g *gear) getGearRatio(nums map[coordinate]string, grid [][]string) {
+	checked := map[coordinate]bool{}
+	for x := g.coor.x - 1; x <= g.coor.x + 1; x++ {
+		for y := g.coor.y - 1; y <= g.coor.y + 1; y++ {
+			if x >= 0 && x < len(grid[y]) && y >= 0 && y < len(grid) {
+				c := coordinate{x, y}
+				if c.isNumeric(grid) && !checked[c] {
+					num := getNum(nums, grid, c, checked)
+					if num > 0 {
+						g.nums = append(g.nums, num)
+					}
+				}
+			}
+		}
+	}
+	if len(g.nums) == 2 {
+		g.gearRatio = g.nums[0] * g.nums[1]
+	}
+}
+
+func getNum(nums map[coordinate]string, grid [][]string, coor coordinate, checked map[coordinate]bool) int {
+	if checked[coor] {
+		return 0
+	}
+	_, ok := nums[coor]
+	checked[coor] = true
+	if ok {
+		numInt, _ := strconv.Atoi(nums[coor])
+		return numInt
+	}
+	return getNum(nums, grid, coordinate{coor.x - 1, coor.y}, checked)
+}
+
 
 
 
@@ -83,12 +119,18 @@ func Day3(useExample bool, debug bool) {
 
 	lines := strings.Split(puzzle, "\n")
 	nums := map[coordinate]string{}
+	gears := []gear{}
 
 	grid := [][]string{}
 	for y, line := range lines {
 		appendNumbers(line, y, nums)
 		chars := strings.Split(line, "")
 		grid = append(grid, chars)
+		for x, char := range chars {
+			if char == "*" {
+				gears = append(gears, gear{coor: coordinate{x, y}})
+			}
+		}
 		/*num := ""
 		for x, char := range chars {
 			//update
@@ -131,39 +173,45 @@ func Day3(useExample bool, debug bool) {
 		}
 	}
 
-	fmt.Println("Part 1: ", p1total)
+	p2total := 0
+	for _, gear := range gears {
+		gear.getGearRatio(nums, grid)
+		p2total += gear.gearRatio
+	}
+
+	fmt.Println("Part 1: ", p1total, "Part 2: ", p2total)
 }
 
 func appendNumbers(line string, y int, nums map[coordinate]string) {
-   	num := ""
-   	currentNumStartX := -1 // Keep track of the start of the current number being built
-   	for x, r := range line {
-   		char := string(r)
-   		// Check if the character is a digit
-   		isDigit := false
-   		if val, ok := nonSymbols[char]; ok && val { // It's in nonSymbols and true (is a digit)
-   			isDigit = true
-   		}
+	num := ""
+	currentNumStartX := -1 // Keep track of the start of the current number being built
+	for x, r := range line {
+		char := string(r)
+		// Check if the character is a digit
+		isDigit := false
+		if val, ok := nonSymbols[char]; ok && val { // It's in nonSymbols and true (is a digit)
+			isDigit = true
+		}
 
-   		if isDigit {
-   			if num == "" { // Starting a new number
-   				currentNumStartX = x
-   			}
-   			num += char
-   		} else { // Character is not a digit (it's a symbol or '.')
-   			if num != "" { // We just finished a number
-   				nums[coordinate{currentNumStartX, y}] = num
-   			}
-   			num = "" // Reset for the next potential number
-   			currentNumStartX = -1
-   		}
-   	}
-   	// After the loop, if num is not empty, it means the line ended with a number
-   	if num != "" {
-   		// currentNumStartX should already hold the correct starting X
-   		nums[coordinate{currentNumStartX, y}] = num
-   	}
-   }
+		if isDigit {
+			if num == "" { // Starting a new number
+				currentNumStartX = x
+			}
+			num += char
+		} else { // Character is not a digit (it's a symbol or '.')
+			if num != "" { // We just finished a number
+				nums[coordinate{currentNumStartX, y}] = num
+			}
+			num = "" // Reset for the next potential number
+			currentNumStartX = -1
+		}
+	}
+	// After the loop, if num is not empty, it means the line ended with a number
+	if num != "" {
+		// currentNumStartX should already hold the correct starting X
+		nums[coordinate{currentNumStartX, y}] = num
+	}
+}
 
 func sortedKeys(m map[coordinate]string) []coordinate {
 	keys := make([]coordinate, 0, len(m))
