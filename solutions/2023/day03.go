@@ -1,4 +1,4 @@
-package solutions
+package solutions2023
 
 import (
 	"fmt"

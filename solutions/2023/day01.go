@@ -1,4 +1,4 @@
-package solutions
+package solutions2023
 
 import (
 	"fmt"
@@ -23,10 +23,10 @@ var stringMap = map[string]string{
 	"zero":  "ze0ro",
 }
 
-var example string = `1abc2
+/*var example string = `1abc2
 pqr3stu8vwx
 a1b2c3d4e5f
-treb7uchet`
+treb7uchet`*/
 
 func Day1() {
 	puzzle := string(osUtils.ReadFileFromPath("puzzles/2023/day1.txt"))
